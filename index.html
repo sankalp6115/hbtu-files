@@ -24,16 +24,20 @@
         }
 
         :root {
-            --bg: #f4f3f0;
+            --bg: #eef0f5;
             --sidebar-bg: #ffffff;
             --border: #ddd;
             --border-light: #e8e8e8;
             --text: #111;
             --text-muted: #666;
             --text-hint: #999;
-            --input-bg: #fafafa;
+            --input-bg: #f5f6fa;
             --accent: #1a56db;
+            --accent-light: #e8efff;
+            --accent-hover: #1648c0;
             --btn-hover: #f0f0ee;
+            --shadow-md: 0 4px 16px rgba(26,86,219,.08);
+            --radius: 10px;
         }
 
         body {
@@ -41,53 +45,118 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            animation: body-fade-in 0.4s ease both;
+        }
+
+        @keyframes body-fade-in {
+            from { opacity: 0; }
+            to   { opacity: 1; }
         }
 
         header {
-            background: #fff;
-            border-bottom: 1px solid var(--border);
-            padding: 14px 28px;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f8ff 100%);
+            border-bottom: 1px solid #e2e8f7;
+            padding: 13px 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 1px 8px rgba(26,86,219,.06);
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
 
         header .logo {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 700;
             color: var(--text);
+            letter-spacing: .01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        header .logo .logo-badge {
+            background: linear-gradient(135deg, #1a56db, #3b82f6);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 5px;
             letter-spacing: .04em;
         }
 
         header .logo span {
             color: var(--text-hint);
             font-weight: 400;
-            margin-left: 6px;
             font-size: 12px;
         }
 
         header .hdr-btn {
-            padding: 8px 18px;
+            padding: 9px 20px;
             font-size: 13px;
-            font-weight: 500;
-            background: var(--accent);
+            font-weight: 600;
+            background: linear-gradient(135deg, #1a56db 0%, #2563eb 100%);
             color: #fff;
             border: none;
-            border-radius: 7px;
+            border-radius: 9px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 7px;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+            box-shadow: 0 3px 12px rgba(26,86,219,.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header .hdr-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.25) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        header .hdr-btn:hover::before {
+            transform: translateX(100%);
         }
 
         header .hdr-btn:hover {
-            background: #1648c0;
+            background: linear-gradient(135deg, #1648c0 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(26,86,219,.4);
+        }
+
+        header .hdr-btn:active {
+            transform: translateY(0) scale(0.97);
         }
 
         header .hdr-btn svg {
             width: 15px;
             height: 15px;
+            transition: transform 0.2s;
         }
+
+        header .hdr-btn:hover svg {
+            transform: translateY(1px);
+        }
+
+        header .hdr-btn .btn-spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        header .hdr-btn.loading .btn-spinner { display: block; }
+        header .hdr-btn.loading .btn-icon { display: none; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .layout {
             display: flex;
@@ -103,25 +172,32 @@
             display: block;
             font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 4px;
-            font-weight: 500;
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: .03em;
+            text-transform: uppercase;
         }
 
         .field input {
             width: 100%;
-            padding: 8px 10px;
-            font-size: 12.5px;
-            border: 1px solid var(--border);
-            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
             background: var(--input-bg);
             color: var(--text);
-            transition: border-color .15s;
+            transition: border-color .18s, box-shadow .18s, background .18s;
         }
 
         .field input:focus {
             outline: none;
             border-color: var(--accent);
             background: #fff;
+            box-shadow: 0 0 0 3px rgba(26,86,219,.12);
+        }
+
+        .field input::placeholder {
+            color: #bbc0cc;
         }
 
         /* ── Preview area ── */
@@ -132,7 +208,10 @@
             align-items: center;
             justify-content: flex-start;
             overflow-y: auto;
-            background: var(--bg);
+            /* subtle dot-grid pattern */
+            background-color: #e8ebf4;
+            background-image: radial-gradient(circle, #c5cbe0 1px, transparent 1px);
+            background-size: 22px 22px;
         }
 
         .preview-label {
@@ -164,9 +243,18 @@
             display: flex;
             flex-direction: column;
             color: #111;
-            box-shadow: 0 6px 32px rgba(0, 0, 0, .13);
+            box-shadow:
+                0 2px 4px rgba(0,0,0,.04),
+                0 8px 24px rgba(0,0,0,.10),
+                0 24px 56px rgba(0,0,0,.12);
             zoom: 0.7;
             /* Scale down for screen preview */
+            animation: page-drop-in 0.5s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        @keyframes page-drop-in {
+            from { opacity: 0; transform: translateY(18px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         @supports not (zoom: 1) {
@@ -289,48 +377,58 @@
 
         .editable-section {
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, outline-color 0.18s ease;
             position: relative;
             padding: 4px;
             margin: -4px;
+            border-radius: 8px;
         }
 
         .editable-section:hover {
-            background-color: rgba(26, 86, 219, 0.04);
-            outline: 2px dashed rgba(26, 86, 219, 0.4);
-            outline-offset: 4px;
-            border-radius: 6px;
+            background-color: rgba(26, 86, 219, 0.05);
+            outline: 2px solid rgba(26, 86, 219, 0.35);
+            outline-offset: 3px;
+            box-shadow: 0 4px 16px rgba(26,86,219,.10);
+            transform: translateY(-1px);
+        }
+
+        .editable-section:active {
+            transform: translateY(0) scale(0.99);
+            box-shadow: none;
         }
 
         .editable-section::after {
             content: "✎";
             position: absolute;
-            top: 4px;
-            right: 4px;
-            background: rgba(26, 86, 219, 0.1);
-            color: var(--accent);
-            font-size: 14px;
-            width: 24px;
-            height: 24px;
+            top: 2px;
+            right: 2px;
+            background: linear-gradient(135deg, #1a56db, #3b82f6);
+            color: #fff;
+            font-size: 11px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            transform: scale(0.7);
+            box-shadow: 0 2px 6px rgba(26,86,219,.4);
         }
 
         .editable-section:hover::after {
             opacity: 1;
+            transform: scale(1);
         }
 
         /* ── Native Dialog Modal ── */
         dialog {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
-            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 24px 64px rgba(0,0,0,.22), 0 4px 16px rgba(0,0,0,.1);
+            padding: 0;
             width: 90%;
             max-width: 440px;
             background: #fff;
@@ -339,56 +437,78 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(0.95);
             margin: 0;
             z-index: 1000;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.22s ease, transform 0.22s cubic-bezier(.22,1,.36,1);
+        }
+
+        dialog[open] {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
 
         dialog::backdrop {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+        }
+
+        /* Accent stripe at top */
+        dialog::before {
+            content: '';
+            display: block;
+            height: 4px;
+            background: linear-gradient(90deg, #1a56db, #3b82f6, #60a5fa);
+        }
+
+        .dialog-inner {
+            padding: 20px 24px 24px;
         }
 
         .dialog-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             border-bottom: 1px solid var(--border-light);
             padding-bottom: 12px;
         }
 
         .dialog-header h2 {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             color: var(--text);
+            letter-spacing: -.01em;
         }
 
         .dialog-close {
-            background: none;
+            background: var(--btn-hover);
             border: none;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 500;
             color: var(--text-muted);
             cursor: pointer;
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: background 0.2s;
+            transition: background 0.15s, color 0.15s;
         }
 
         .dialog-close:hover {
-            background: var(--btn-hover);
+            background: #e0e0e0;
+            color: var(--text);
         }
 
         .dialog-body {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .dialog-section {
@@ -399,6 +519,12 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            animation: dialog-content-in 0.2s ease both;
+        }
+
+        @keyframes dialog-content-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .dialog-footer {
@@ -410,18 +536,25 @@
         }
 
         .dialog-save-btn {
-            padding: 8px 20px;
+            padding: 9px 22px;
             font-size: 13px;
-            font-weight: 500;
-            background: var(--accent);
+            font-weight: 600;
+            background: linear-gradient(135deg, #1a56db, #2563eb);
             color: #fff;
             border: none;
-            border-radius: 7px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 10px rgba(26,86,219,.35);
         }
 
         .dialog-save-btn:hover {
-            background: #1648c0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(26,86,219,.45);
+        }
+
+        .dialog-save-btn:active {
+            transform: scale(0.97);
         }
 
         #pdf-content {
@@ -479,6 +612,12 @@
             height: 48px;
         }
 
+        /* Preview area: give breathing room on desktop */
+        .preview-area {
+            padding-top: 24px;
+            padding-bottom: 40px;
+        }
+
         @media (max-width: 768px) {
             header {
                 padding: 10px 16px;
@@ -524,6 +663,40 @@
                 margin-bottom: calc(-1 * (296mm * (1 - var(--page-scale, 0.45))));
             }
 
+            /* Mobile: dialog becomes a bottom sheet */
+            dialog {
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 20px 20px 0 0;
+                transform: translateY(20px) scale(1);
+                margin: 0;
+            }
+
+            dialog[open] {
+                transform: translateY(0) scale(1);
+            }
+
+            dialog::before {
+                border-radius: 20px 20px 0 0;
+            }
+
+            /* Drag handle indicator */
+            dialog::after {
+                content: '';
+                display: block;
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 36px;
+                height: 4px;
+                background: #d0d5e0;
+                border-radius: 2px;
+            }
         }
 
         /* ── Interactive Onboarding Tour Tooltips ── */
@@ -531,104 +704,60 @@
             position: fixed;
             display: none;
             bottom: auto;
-            width: 290px;
-            background: #cfffd3;
-            color: #000000;
-            border-radius: 12px;
-            padding: 16px 18px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(204, 255, 206, 0.4);
-            border: 1px solid rgb(255, 255, 255);
+            width: 300px;
+            background: rgba(255,255,255,0.96);
+            color: #111;
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);
+            border: 1.5px solid rgba(255,255,255,.9);
             z-index: 10000;
             text-align: left;
             font-family: "Montserrat", sans-serif;
             cursor: default;
             pointer-events: auto;
-            /* Reset uppercase inherited from sections */
             letter-spacing: normal;
+            backdrop-filter: blur(10px);
         }
 
         .tour-tooltip.active {
             display: block;
-            animation: tooltip-fade-in 0.25s ease-out, tooltip-bob 2s ease-in-out infinite;
+            animation: tooltip-fade-in 0.28s cubic-bezier(.22,1,.36,1) both;
         }
 
         @keyframes tooltip-fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @keyframes tooltip-bob {
-
-            0%,
-            100% {
-                margin-bottom: 0px;
-            }
-
-            50% {
-                margin-bottom: 6px;
-            }
-        }
-
-        /* Tooltip arrows */
+        /* Tooltip arrow pointing down */
         .tour-tooltip::after {
             content: "";
             position: absolute;
             top: 100%;
-            border-width: 8px;
+            left: 28px;
+            border-width: 7px;
             border-style: solid;
-            border-color: #ffffff transparent transparent transparent;
-        }
-
-        /* Position variations for tooltips and arrows */
-        .tour-tooltip-center {
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .tour-tooltip-center::after {
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .tour-tooltip-left {
-            left: 0;
-        }
-
-        .tour-tooltip-left::after {
-            left: 24px;
-        }
-
-        .tour-tooltip-right {
-            right: 0;
-        }
-
-        .tour-tooltip-right::after {
-            right: 24px;
+            border-color: rgba(255,255,255,.96) transparent transparent transparent;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,.1));
         }
 
         .tour-tooltip h3 {
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 700;
-            margin-bottom: 6px;
-            color: #000000;
+            margin-bottom: 7px;
+            color: #0f172a;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
             letter-spacing: -0.01em;
         }
 
         .tour-tooltip p {
-            font-size: 11px;
-            color: #000000;
-            line-height: 1.5;
-            margin-bottom: 12px;
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.55;
+            margin-bottom: 14px;
             font-weight: 400;
         }
 
@@ -639,45 +768,50 @@
         }
 
         .tour-progress {
-            font-size: 10px;
-            color: #464646;
-            font-weight: 500;
+            font-size: 10.5px;
+            color: #94a3b8;
+            font-weight: 600;
+            letter-spacing: .04em;
         }
 
         .tour-buttons {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .tour-btn-next {
-            background: var(--accent);
+            background: linear-gradient(135deg, #1a56db, #2563eb);
             color: #fff;
             border: none;
-            border-radius: 6px;
-            padding: 5px 10px;
-            font-size: 10px;
+            border-radius: 7px;
+            padding: 6px 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.15s;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 8px rgba(26,86,219,.35);
         }
 
         .tour-btn-next:hover {
-            background: #1648c0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26,86,219,.45);
         }
 
         .tour-btn-skip {
             background: none;
-            color: #9ca3af;
+            color: #94a3b8;
             border: none;
-            padding: 5px 6px;
-            font-size: 10px;
+            padding: 6px 8px;
+            font-size: 11px;
             font-weight: 500;
             cursor: pointer;
             transition: color 0.15s;
+            border-radius: 6px;
         }
 
         .tour-btn-skip:hover {
-            color: #2c2c2c;
+            color: #334155;
+            background: #f1f5f9;
         }
 
         @keyframes pulse-highlight {
@@ -730,16 +864,20 @@
 </head>
 <body>
     <header>
-        <div class="logo">HBTU Cover Generator</div>
+        <div class="logo">
+            <span class="logo-badge">HBTU</span>
+            Cover Generator
+        </div>
         <div class="header-actions">
-            <button class="hdr-btn" onclick="downloadPDF()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            <button class="hdr-btn" id="download-btn" onclick="downloadPDF()">
+                <span class="btn-spinner"></span>
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                Download PDF
+                <span class="btn-label">Download PDF</span>
             </button>
         </div>
     </header>
@@ -1015,6 +1153,10 @@
         }
 
         function downloadPDF() {
+            const btn = document.getElementById('download-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
             const el = document.getElementById('pdf-content');
             const coverPage = document.getElementById('cover-page');
             const indexPage = document.getElementById('index-page');
@@ -1022,6 +1164,10 @@
             // Disable preview styles, gaps, and shadows temporarily so html2canvas renders the true elements
             const origGap = el.style.gap;
             el.style.gap = '0';
+
+            // Freeze body fade-in animation during capture
+            document.body.style.animation = 'none';
+            document.body.style.opacity = '1';
 
             const origZoomCover = coverPage.style.zoom;
             const origTransformCover = coverPage.style.transform;
@@ -1039,6 +1185,8 @@
             coverPage.style.transform = 'none';
             coverPage.style.marginBottom = '0';
             coverPage.style.boxShadow = 'none';
+            coverPage.style.animation = 'none';
+            coverPage.style.opacity = '1';
             coverPage.style.setProperty('--page-scale', '1');
             coverPage.style.width = '210mm';
             coverPage.style.height = '296mm';
@@ -1047,6 +1195,8 @@
             indexPage.style.transform = 'none';
             indexPage.style.marginBottom = '0';
             indexPage.style.boxShadow = 'none';
+            indexPage.style.animation = 'none';
+            indexPage.style.opacity = '1';
             indexPage.style.setProperty('--page-scale', '1');
             indexPage.style.width = '210mm';
             indexPage.style.height = '296mm';
@@ -1064,12 +1214,17 @@
                 pagebreak: { mode: ['css', 'legacy'], before: '#index-page' }
             }).from(el).save().then(() => {
                 // Restore screen preview styles
+                btn.classList.remove('loading');
+                btn.disabled = false;
+
                 el.style.gap = origGap;
 
                 coverPage.style.zoom = origZoomCover;
                 coverPage.style.transform = origTransformCover;
                 coverPage.style.marginBottom = origMarginCover;
                 coverPage.style.boxShadow = origShadowCover;
+                coverPage.style.animation = '';
+                coverPage.style.opacity = '';
                 if (origScaleCover) {
                     coverPage.style.setProperty('--page-scale', origScaleCover);
                 } else {
@@ -1082,6 +1237,10 @@
                 indexPage.style.transform = origTransformIndex;
                 indexPage.style.marginBottom = origMarginIndex;
                 indexPage.style.boxShadow = origShadowIndex;
+                indexPage.style.animation = '';
+                indexPage.style.opacity = '';
+                document.body.style.animation = '';
+                document.body.style.opacity = '';
                 if (origScaleIndex) {
                     indexPage.style.setProperty('--page-scale', origScaleIndex);
                 } else {
@@ -1308,6 +1467,7 @@
         });
     </script>
     <dialog id="editor-dialog">
+        <div class="dialog-inner">
         <div class="dialog-header">
             <h2 id="dialog-title">Edit Details</h2>
             <button class="dialog-close" onclick="closeEditorModal()">&times;</button>
@@ -1360,6 +1520,7 @@
         <div class="dialog-footer">
             <button class="dialog-save-btn" onclick="closeEditorModal()">Done</button>
         </div>
+        </div><!-- .dialog-inner -->
     </dialog>
 
     <!-- Onboarding Tour Tooltips (outside .page so CSS transforms don't affect sizing) -->

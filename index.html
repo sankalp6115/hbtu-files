@@ -523,13 +523,14 @@
                 transform: scale(var(--page-scale, 0.45));
                 margin-bottom: calc(-1 * (296mm * (1 - var(--page-scale, 0.45))));
             }
+
         }
 
         /* ── Interactive Onboarding Tour Tooltips ── */
         .tour-tooltip {
+            position: fixed;
             display: none;
-            position: absolute;
-            bottom: calc(100% + 15px);
+            bottom: auto;
             width: 290px;
             background: #cfffd3;
             color: #000000;
@@ -709,7 +710,6 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(2px);
             z-index: 998;
             pointer-events: auto;
         }
@@ -766,20 +766,6 @@
                             <div class="file-title" id="p-code"><b>Lab File (NCS - 203)</b></div>
                             <div class="session-text" id="p-session">Session 2025-26</div>
 
-                            <!-- Onboarding Step 1 -->
-                            <div class="tour-tooltip tour-tooltip-center" id="tour-step-1"
-                                onclick="event.stopPropagation()">
-                                <h3>📝 Step 1: Subject details</h3>
-                                <p>Click on this section to change the course name, lab code, and session.</p>
-                                <div class="tour-footer">
-                                    <span class="tour-progress">1 of 3</span>
-                                    <div class="tour-buttons">
-                                        <button class="tour-btn-skip" onclick="endTour(event)">Skip</button>
-                                        <button class="tour-btn-next" onclick="nextTourStep(event, 2)">Next
-                                            &rarr;</button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="spacer"></div>
@@ -790,20 +776,6 @@
                                 <div class="k">Submitted To:</div>
                                 <div class="v" id="p-teacher">Mrs. XYZ</div>
 
-                                <!-- Onboarding Step 2 -->
-                                <div class="tour-tooltip tour-tooltip-left" id="tour-step-2"
-                                    onclick="event.stopPropagation()">
-                                    <h3>👨‍🏫 Step 2: Faculty details</h3>
-                                    <p>Click here to update the name of the teacher you are submitting to.</p>
-                                    <div class="tour-footer">
-                                        <span class="tour-progress">2 of 3</span>
-                                        <div class="tour-buttons">
-                                            <button class="tour-btn-skip" onclick="endTour(event)">Skip</button>
-                                            <button class="tour-btn-next" onclick="nextTourStep(event, 3)">Next
-                                                &rarr;</button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="fc editable-section" onclick="openSectionModal('student')"
                                 title="Click to edit student details">
@@ -824,18 +796,6 @@
                                     <div class="v" id="p-branch">Computer Science and Engineering</div>
                                 </div>
 
-                                <!-- Onboarding Step 3 -->
-                                <div class="tour-tooltip tour-tooltip-right" id="tour-step-3"
-                                    onclick="event.stopPropagation()">
-                                    <h3>🎓 Step 3: Student details</h3>
-                                    <p>Click here to fill in your name, roll number, branch, and academic year.</p>
-                                    <div class="tour-footer">
-                                        <span class="tour-progress">3 of 3</span>
-                                        <div class="tour-buttons">
-                                            <button class="tour-btn-next" onclick="endTour(event)">Finish Tour</button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1172,9 +1132,39 @@
             showTourStep(1);
         }
 
+        function positionTooltip(tooltipEl, targetSec) {
+            // Use getBoundingClientRect so CSS transform/zoom on .page doesn't affect us
+            const rect = targetSec.getBoundingClientRect();
+            const tipW = 290;
+            const margin = 12;
+            const gap = 14; // space above the target
+
+            // Preferred: centre above the target
+            let left = rect.left + rect.width / 2 - tipW / 2;
+            let top = rect.top - gap;
+
+            // Clamp horizontally within viewport
+            left = Math.max(margin, Math.min(left, window.innerWidth - tipW - margin));
+
+            // If no room above, show below
+            const tipH = tooltipEl.offsetHeight || 160;
+            if (top - tipH < margin) {
+                top = rect.bottom + gap;
+                tooltipEl.style.setProperty('--arrow-top', '-8px');
+            } else {
+                top = rect.top - tipH - gap;
+                tooltipEl.style.removeProperty('--arrow-top');
+            }
+
+            tooltipEl.style.left = left + 'px';
+            tooltipEl.style.top = top + 'px';
+        }
+
         function showTourStep(stepNum) {
             document.querySelectorAll('.tour-tooltip').forEach(tooltip => {
                 tooltip.classList.remove('active');
+                tooltip.style.left = '';
+                tooltip.style.top = '';
             });
             document.querySelectorAll('.editable-section').forEach(sec => {
                 sec.classList.remove('tour-highlighted');
@@ -1197,6 +1187,8 @@
                 targetSec.classList.add('tour-highlighted');
                 tooltipEl.classList.add('active');
                 targetSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Re-position after scroll settles
+                setTimeout(() => positionTooltip(tooltipEl, targetSec), 320);
             }
         }
 
@@ -1369,6 +1361,40 @@
             <button class="dialog-save-btn" onclick="closeEditorModal()">Done</button>
         </div>
     </dialog>
+
+    <!-- Onboarding Tour Tooltips (outside .page so CSS transforms don't affect sizing) -->
+    <div class="tour-tooltip" id="tour-step-1" onclick="event.stopPropagation()">
+        <h3>📝 Step 1: Subject details</h3>
+        <p>Click on this section to change the course name, lab code, and session.</p>
+        <div class="tour-footer">
+            <span class="tour-progress">1 of 3</span>
+            <div class="tour-buttons">
+                <button class="tour-btn-skip" onclick="endTour(event)">Skip</button>
+                <button class="tour-btn-next" onclick="nextTourStep(event, 2)">Next &rarr;</button>
+            </div>
+        </div>
+    </div>
+    <div class="tour-tooltip" id="tour-step-2" onclick="event.stopPropagation()">
+        <h3>👨‍🏫 Step 2: Faculty details</h3>
+        <p>Click here to update the name of the teacher you are submitting to.</p>
+        <div class="tour-footer">
+            <span class="tour-progress">2 of 3</span>
+            <div class="tour-buttons">
+                <button class="tour-btn-skip" onclick="endTour(event)">Skip</button>
+                <button class="tour-btn-next" onclick="nextTourStep(event, 3)">Next &rarr;</button>
+            </div>
+        </div>
+    </div>
+    <div class="tour-tooltip" id="tour-step-3" onclick="event.stopPropagation()">
+        <h3>🎓 Step 3: Student details</h3>
+        <p>Click here to fill in your name, roll number, branch, and academic year.</p>
+        <div class="tour-footer">
+            <span class="tour-progress">3 of 3</span>
+            <div class="tour-buttons">
+                <button class="tour-btn-next" onclick="endTour(event)">Finish Tour</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Interactive Tour Overlay backdrop -->
     <div class="tour-overlay" onclick="endTour(event)"></div>

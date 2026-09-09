@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBTU Cover Page Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="image_data.js"></script>
+    <script src="../analytics.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="https://i.ibb.co/vCBZt41M/10477524.png" type="image/x-icon">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        :root {
+            --bg: #f4f3f0;
+            --sidebar-bg: #ffffff;
+            --border: #ddd;
+            --border-light: #e8e8e8;
+            --text: #111;
+            --text-muted: #666;
+            --text-hint: #999;
+            --input-bg: #fafafa;
+            --accent: #1a56db;
+            --btn-hover: #f0f0ee;
+        }
+
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header .logo {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            letter-spacing: .04em;
+        }
+
+        header .logo span {
+            color: var(--text-hint);
+            font-weight: 400;
+            margin-left: 6px;
+            font-size: 12px;
+        }
+
+        header .hdr-btn {
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        header .hdr-btn:hover {
+            background: #1648c0;
+        }
+
+        header .hdr-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .layout {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 57px);
+        }
+
+        .field {
+            margin-bottom: 11px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 12.5px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--input-bg);
+            color: var(--text);
+            transition: border-color .15s;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: #fff;
+        }
+
+        /* ── Preview area ── */
+        .preview-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            background: var(--bg);
+        }
+
+        .preview-label {
+            font-size: 10px;
+            color: var(--text-hint);
+            letter-spacing: .1em;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-label::before,
+        .preview-label::after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── The actual cover page ── */
+        .page {
+            width: 210mm;
+            height: 296mm;
+            font-size: 26.5px;
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            color: #111;
+            box-shadow: 0 6px 32px rgba(0, 0, 0, .13);
+            zoom: 0.7;
+            /* Scale down for screen preview */
+        }
+
+        @supports not (zoom: 1) {
+            .page {
+                transform: scale(0.6);
+                transform-origin: top center;
+                margin-bottom: -450px;
+            }
+        }
+
+        .page-border-outer {
+            position: absolute;
+            inset: 8px;
+            border: 12px double #111;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .header-photo {
+            margin-top: 20px;
+            min-height: 260px;
+            max-height: 560px;
+            width: 95%;
+            align-self: center;
+            overflow: hidden;
+        }
+
+        .header-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .header-photo .ph-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+            font-size: 11px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header-photo .ph-placeholder svg {
+            opacity: .35;
+        }
+
+        .page-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 53px 36px;
+        }
+
+        .subject-name {
+            font-size: clamp(1.8em, 2em, 2.4em);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #111;
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 6px;
+            text-shadow: 1 px 1px 0 white, 2px 2px 0 black;
+        }
+
+        .file-title {
+            font-size: 1.3em;
+            font-weight: 100;
+            color: #111;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .session-text {
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #555;
+            text-align: center;
+        }
+
+        .spacer {
+            flex: 0.8;
+        }
+
+        .footer-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 10px;
+            font-size: 0.7em;
+        }
+
+        .fc {}
+
+        .fc .kv {
+            display: grid;
+            grid-template-columns: 1fr 2.5fr;
+        }
+
+        .fc .k {
+            font-weight: 500;
+            color: #111;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .fc .v {
+            font-size: 1.1em;
+            margin: 0px 4px 10px 30px;
+            color: #333;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editable-section {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            padding: 4px;
+            margin: -4px;
+        }
+
+        .editable-section:hover {
+            background-color: rgba(26, 86, 219, 0.04);
+            outline: 2px dashed rgba(26, 86, 219, 0.4);
+            outline-offset: 4px;
+            border-radius: 6px;
+        }
+
+        .editable-section::after {
+            content: "✎";
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(26, 86, 219, 0.1);
+            color: var(--accent);
+            font-size: 14px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .editable-section:hover::after {
+            opacity: 1;
+        }
+
+        /* ── Native Dialog Modal ── */
+        dialog {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+            padding: 24px;
+            width: 90%;
+            max-width: 440px;
+            background: #fff;
+            color: var(--text);
+            font-family: "Montserrat", sans-serif;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            z-index: 1000;
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 12px;
+        }
+
+        .dialog-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .dialog-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .dialog-close:hover {
+            background: var(--btn-hover);
+        }
+
+        .dialog-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .dialog-section {
+            display: none;
+        }
+
+        .dialog-section.active {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .dialog-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 14px;
+        }
+
+        .dialog-save-btn {
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .dialog-save-btn:hover {
+            background: #1648c0;
+        }
+
+        #pdf-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #index-page .page-border-outer {
+            border: 3px solid #000;
+            inset: 24px;
+        }
+
+        .index-body {
+            padding: 40px 53px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .index-title {
+            font-size: 2.2em;
+            font-weight: 500;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            margin-top: 10px;
+            color: #000;
+            text-align: center;
+        }
+
+        .index-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        .index-table th {
+            border: 1.5px solid #000;
+            padding: 5px 2px;
+            font-size: 0.6em;
+            font-weight: 500;
+            text-align: center;
+            vertical-align: middle;
+            background: #fff;
+            color: #000;
+        }
+
+        .index-table td {
+            border: 1.5px solid #000;
+            height: 48px;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 10px 16px;
+            }
+
+            header .logo {
+                font-size: 13px;
+            }
+
+            header .logo span {
+                display: none;
+            }
+
+            header .hdr-btn {
+                padding: 6px 12px;
+                font-size: 11.5px;
+                gap: 5px;
+            }
+
+            header .hdr-btn svg {
+                width: 13px;
+                height: 13px;
+            }
+
+            .layout {
+                flex-direction: column;
+                height: calc(100vh - 57px);
+                overflow-x: hidden;
+            }
+
+            .preview-area {
+                padding: 20px 10px;
+                width: 100%;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .page {
+                transform-origin: top center;
+                transform: scale(var(--page-scale, 0.45));
+                margin-bottom: calc(-1 * (296mm * (1 - var(--page-scale, 0.45))));
+            }
+        }
+
+        /* ── Interactive Onboarding Tour Tooltips ── */
+        .tour-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 15px);
+            width: 290px;
+            background: #cfffd3;
+            color: #000000;
+            border-radius: 12px;
+            padding: 16px 18px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(204, 255, 206, 0.4);
+            border: 1px solid rgb(255, 255, 255);
+            z-index: 10000;
+            text-align: left;
+            font-family: "Montserrat", sans-serif;
+            cursor: default;
+            pointer-events: auto;
+            /* Reset uppercase inherited from sections */
+            letter-spacing: normal;
+        }
+
+        .tour-tooltip.active {
+            display: block;
+            animation: tooltip-fade-in 0.25s ease-out, tooltip-bob 2s ease-in-out infinite;
+        }
+
+        @keyframes tooltip-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes tooltip-bob {
+
+            0%,
+            100% {
+                margin-bottom: 0px;
+            }
+
+            50% {
+                margin-bottom: 6px;
+            }
+        }
+
+        /* Tooltip arrows */
+        .tour-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            border-width: 8px;
+            border-style: solid;
+            border-color: #ffffff transparent transparent transparent;
+        }
+
+        /* Position variations for tooltips and arrows */
+        .tour-tooltip-center {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tour-tooltip-center::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tour-tooltip-left {
+            left: 0;
+        }
+
+        .tour-tooltip-left::after {
+            left: 24px;
+        }
+
+        .tour-tooltip-right {
+            right: 0;
+        }
+
+        .tour-tooltip-right::after {
+            right: 24px;
+        }
+
+        .tour-tooltip h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #000000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: -0.01em;
+        }
+
+        .tour-tooltip p {
+            font-size: 11px;
+            color: #000000;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            font-weight: 400;
+        }
+
+        .tour-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tour-progress {
+            font-size: 10px;
+            color: #464646;
+            font-weight: 500;
+        }
+
+        .tour-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tour-btn-next {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .tour-btn-next:hover {
+            background: #1648c0;
+        }
+
+        .tour-btn-skip {
+            background: none;
+            color: #9ca3af;
+            border: none;
+            padding: 5px 6px;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .tour-btn-skip:hover {
+            color: #2c2c2c;
+        }
+
+        @keyframes pulse-highlight {
+            0% {
+                box-shadow: 0 0 0 0 rgba(26, 86, 219, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(26, 86, 219, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(26, 86, 219, 0);
+            }
+        }
+
+        .editable-section.tour-highlighted {
+            position: relative;
+            z-index: 1000 !important;
+            animation: pulse-highlight 1.5s infinite;
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
+            border-radius: 6px;
+            background-color: rgba(26, 86, 219, 0.03);
+        }
+
+        /* Dim overlay for active tour step */
+        .tour-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(2px);
+            z-index: 998;
+            pointer-events: auto;
+        }
+
+        body.tour-active .tour-overlay {
+            display: block;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.2);
+        }
+
+        .onboarding-btn:hover {
+            background: #1648c0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">HBTU Cover Generator</div>
+        <div class="header-actions">
+            <button class="hdr-btn" onclick="downloadPDF()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download PDF
+            </button>
+        </div>
+    </header>
+    <div class="layout">
+        <!-- Preview -->
+        <div class="preview-area">
+            <div id="pdf-content">
+                <div class="page" id="cover-page">
+                    <div class="page-border-outer"></div>
+                    <div class="page-border-inner"></div>
+
+                    <!-- Header photo zone -->
+                    <div class="header-photo" id="header-area">
+                        <img id="preview-img" style="display:block; width:100%; height:100%; object-fit:cover;">
+                    </div>
+
+                    <!-- Body -->
+                    <div class="page-body">
+                        <div class="divider"></div>
+
+                        <div class="editable-section" onclick="openSectionModal('subject')"
+                            title="Click to edit subject details">
+                            <div class="subject-name" id="p-subject">DATA STRUCTURES USING C</div>
+                            <div class="file-title" id="p-code"><b>Lab File (NCS - 203)</b></div>
+                            <div class="session-text" id="p-session">Session 2025-26</div>
+
+                            <!-- Onboarding Step 1 -->
+                            <div class="tour-tooltip tour-tooltip-center" id="tour-step-1"
+                                onclick="event.stopPropagation()">
+                                <h3>📝 Step 1: Subject details</h3>
+                                <p>Click on this section to change the course name, lab code, and session.</p>
+                                <div class="tour-footer">
+                                    <span class="tour-progress">1 of 3</span>
+                                    <div class="tour-buttons">
+                                        <button class="tour-btn-skip" onclick="endTour(event)">Skip</button>
+                                        <button class="tour-btn-next" onclick="nextTourStep(event, 2)">Next
+                                            &rarr;</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="spacer"></div>
+
+                        <div class="footer-grid">
+                            <div class="fc editable-section" onclick="openSectionModal('teacher')"
+                                title="Click to edit faculty details">
+                                <div class="k">Submitted To:</div>
+                                <div class="v" id="p-teacher">Mrs. XYZ</div>
+
+                                <!-- Onboarding Step 2 -->
+                                <div class="tour-tooltip tour-tooltip-left" id="tour-step-2"
+                                    onclick="event.stopPropagation()">
+                                    <h3>👨‍🏫 Step 2: Faculty details</h3>
+                                    <p>Click here to update the name of the teacher you are submitting to.</p>
+                                    <div class="tour-footer">
+                                        <span class="tour-progress">2 of 3</span>
+                                        <div class="tour-buttons">
+                                            <button class="tour-btn-skip" onclick="endTour(event)">Skip</button>
+                                            <button class="tour-btn-next" onclick="nextTourStep(event, 3)">Next
+                                                &rarr;</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="fc editable-section" onclick="openSectionModal('student')"
+                                title="Click to edit student details">
+                                <div class="kv">
+                                    <div class="k">Submitted By:</div>
+                                    <div class="v" id="p-name">Tony Stark</div>
+                                </div>
+                                <div class="kv">
+                                    <div class="k">Year:</div>
+                                    <div class="v" id="p-year">2<sup>nd</sup></div>
+                                </div>
+                                <div class="kv">
+                                    <div class="k">Roll No.:</div>
+                                    <div class="v" id="p-roll">24010X0XX</div>
+                                </div>
+                                <div class="kv">
+                                    <div class="k">Branch:</div>
+                                    <div class="v" id="p-branch">Computer Science and Engineering</div>
+                                </div>
+
+                                <!-- Onboarding Step 3 -->
+                                <div class="tour-tooltip tour-tooltip-right" id="tour-step-3"
+                                    onclick="event.stopPropagation()">
+                                    <h3>🎓 Step 3: Student details</h3>
+                                    <p>Click here to fill in your name, roll number, branch, and academic year.</p>
+                                    <div class="tour-footer">
+                                        <span class="tour-progress">3 of 3</span>
+                                        <div class="tour-buttons">
+                                            <button class="tour-btn-next" onclick="endTour(event)">Finish Tour</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page" id="index-page">
+                    <div class="page-border-outer"></div>
+                    <div class="index-body">
+                        <h1 class="index-title">INDEX</h1>
+                        <table class="index-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 8%;">S.No.</th>
+                                    <th style="width: 34%;">Practical Name</th>
+                                    <th style="width: 18%;">Date of Submission</th>
+                                    <th style="width: 18%;">Date of Activity</th>
+                                    <th style="width: 8%;">Page</th>
+                                    <th style="width: 14%;">Signature</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const DEFAULTS = {
+            subject: 'design and analysis of algorithms',
+            code: 'Lab File (NCS - 301)',
+            session: '2025-26',
+            teacher: 'Mr. Stan Lee',
+            name: 'Tony Stark',
+            year: '2nd',
+            roll: '2401040XX',
+            branch: 'Computer Science and Engineering',
+        };
+
+        function g(id) { return document.getElementById(id).value; }
+
+        function formatYear(val) {
+            return val.replace(/(\d+)(st|nd|rd|th)/i, '$1<sup>$2</sup>');
+        }
+
+        function adjustFontSize(id, maxEm, minEm, threshold, currentVal) {
+            const el = document.getElementById(id);
+            let size = maxEm;
+            if (currentVal.length > threshold) {
+                // shrink by 0.04em for every character over the threshold
+                size = maxEm - (currentVal.length - threshold) * 0.04;
+                if (size < minEm) size = minEm;
+            }
+            el.style.fontSize = size + 'em';
+        }
+
+        function sync() {
+            const subject = (g('f-subject') || DEFAULTS.subject).toUpperCase();
+            const code = g('f-code') || DEFAULTS.code;
+            const session = g('f-session') || DEFAULTS.session;
+            const teacher = g('f-teacher') || DEFAULTS.teacher;
+            const name = (g('f-name') || DEFAULTS.name);
+            const roll = g('f-roll') || DEFAULTS.roll;
+            const branch = g('f-branch') || DEFAULTS.branch;
+            const year = g('f-year') || DEFAULTS.year;
+
+            document.getElementById('p-subject').textContent = subject;
+            adjustFontSize('p-subject', 2, 1.4, 15, subject);
+
+            document.getElementById('p-code').innerHTML = '<b>' + code + '</b>';
+
+            document.getElementById('p-session').textContent = 'Session ' + session;
+            document.getElementById('p-teacher').textContent = teacher;
+            document.getElementById('p-name').textContent = name;
+            document.getElementById('p-roll').textContent = roll;
+            document.getElementById('p-branch').textContent = branch;
+            document.getElementById('p-year').innerHTML = formatYear(year);
+        }
+
+        function downloadPDF() {
+            const el = document.getElementById('pdf-content');
+            const coverPage = document.getElementById('cover-page');
+            const indexPage = document.getElementById('index-page');
+
+            // Disable preview styles, gaps, and shadows temporarily so html2canvas renders the true elements
+            const origGap = el.style.gap;
+            el.style.gap = '0';
+
+            const origZoomCover = coverPage.style.zoom;
+            const origTransformCover = coverPage.style.transform;
+            const origMarginCover = coverPage.style.marginBottom;
+            const origShadowCover = coverPage.style.boxShadow;
+            const origScaleCover = coverPage.style.getPropertyValue('--page-scale');
+
+            const origZoomIndex = indexPage.style.zoom;
+            const origTransformIndex = indexPage.style.transform;
+            const origMarginIndex = indexPage.style.marginBottom;
+            const origShadowIndex = indexPage.style.boxShadow;
+            const origScaleIndex = indexPage.style.getPropertyValue('--page-scale');
+
+            coverPage.style.zoom = '1';
+            coverPage.style.transform = 'none';
+            coverPage.style.marginBottom = '0';
+            coverPage.style.boxShadow = 'none';
+            coverPage.style.setProperty('--page-scale', '1');
+            coverPage.style.width = '210mm';
+            coverPage.style.height = '296mm';
+
+            indexPage.style.zoom = '1';
+            indexPage.style.transform = 'none';
+            indexPage.style.marginBottom = '0';
+            indexPage.style.boxShadow = 'none';
+            indexPage.style.setProperty('--page-scale', '1');
+            indexPage.style.width = '210mm';
+            indexPage.style.height = '296mm';
+
+            const subjectName = (g('f-subject') || DEFAULTS.subject).replace(/\s+/g, '_').toLowerCase();
+            const rollNo = g('f-roll') || DEFAULTS.roll;
+            const filename = 'cover_' + subjectName + '_' + rollNo + '.pdf';
+
+            html2pdf().set({
+                margin: 0,
+                filename: filename,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 4, useCORS: true, backgroundColor: '#ffffff', logging: false, allowTaint: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'], before: '#index-page' }
+            }).from(el).save().then(() => {
+                // Restore screen preview styles
+                el.style.gap = origGap;
+
+                coverPage.style.zoom = origZoomCover;
+                coverPage.style.transform = origTransformCover;
+                coverPage.style.marginBottom = origMarginCover;
+                coverPage.style.boxShadow = origShadowCover;
+                if (origScaleCover) {
+                    coverPage.style.setProperty('--page-scale', origScaleCover);
+                } else {
+                    coverPage.style.removeProperty('--page-scale');
+                }
+                coverPage.style.width = '';
+                coverPage.style.height = '';
+
+                indexPage.style.zoom = origZoomIndex;
+                indexPage.style.transform = origTransformIndex;
+                indexPage.style.marginBottom = origMarginIndex;
+                indexPage.style.boxShadow = origShadowIndex;
+                if (origScaleIndex) {
+                    indexPage.style.setProperty('--page-scale', origScaleIndex);
+                } else {
+                    indexPage.style.removeProperty('--page-scale');
+                }
+                indexPage.style.width = '';
+                indexPage.style.height = '';
+            });
+        }
+
+        function openSectionModal(sectionId) {
+            // Hide all dialog sections
+            document.querySelectorAll('.dialog-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Set dialog title based on section
+            const titleEl = document.getElementById('dialog-title');
+            if (sectionId === 'subject') {
+                titleEl.textContent = 'Edit Subject & Session';
+                document.getElementById('dialog-sec-subject').classList.add('active');
+            } else if (sectionId === 'teacher') {
+                titleEl.textContent = 'Edit Faculty Details';
+                document.getElementById('dialog-sec-teacher').classList.add('active');
+            } else if (sectionId === 'student') {
+                titleEl.textContent = 'Edit Student Details';
+                document.getElementById('dialog-sec-student').classList.add('active');
+            }
+
+            // Open dialog natively
+            const dialog = document.getElementById('editor-dialog');
+            document.body.style.overflow = 'hidden';
+            dialog.showModal();
+
+            // Auto-focus the first visible input inside the active section
+            const activeSec = document.querySelector('.dialog-section.active');
+            if (activeSec) {
+                const firstInput = activeSec.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }
+        }
+
+        let activeTourStep = 0;
+
+        function startTour() {
+            activeTourStep = 1;
+            document.body.classList.add('tour-active');
+            showTourStep(1);
+        }
+
+        function showTourStep(stepNum) {
+            document.querySelectorAll('.tour-tooltip').forEach(tooltip => {
+                tooltip.classList.remove('active');
+            });
+            document.querySelectorAll('.editable-section').forEach(sec => {
+                sec.classList.remove('tour-highlighted');
+            });
+
+            let targetSec;
+            let tooltipEl;
+            if (stepNum === 1) {
+                targetSec = document.querySelector(".editable-section[onclick*='subject']");
+                tooltipEl = document.getElementById('tour-step-1');
+            } else if (stepNum === 2) {
+                targetSec = document.querySelector(".editable-section[onclick*='teacher']");
+                tooltipEl = document.getElementById('tour-step-2');
+            } else if (stepNum === 3) {
+                targetSec = document.querySelector(".editable-section[onclick*='student']");
+                tooltipEl = document.getElementById('tour-step-3');
+            }
+
+            if (targetSec && tooltipEl) {
+                targetSec.classList.add('tour-highlighted');
+                tooltipEl.classList.add('active');
+                targetSec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function nextTourStep(event, nextStep) {
+            if (event) event.stopPropagation();
+            activeTourStep = nextStep;
+            showTourStep(nextStep);
+        }
+
+        function endTour(event) {
+            if (event) event.stopPropagation();
+            document.body.classList.remove('tour-active');
+            document.querySelectorAll('.tour-tooltip').forEach(tooltip => {
+                tooltip.classList.remove('active');
+            });
+            document.querySelectorAll('.editable-section').forEach(sec => {
+                sec.classList.remove('tour-highlighted');
+            });
+            localStorage.setItem('hbtu_cover_visited', 'true');
+        }
+
+        function openSectionModal(sectionId) {
+            // Cancel interactive tour if user clicks to edit
+            if (document.body.classList.contains('tour-active')) {
+                endTour();
+            }
+
+            // Hide all dialog sections
+            document.querySelectorAll('.dialog-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Set dialog title based on section
+            const titleEl = document.getElementById('dialog-title');
+            if (sectionId === 'subject') {
+                titleEl.textContent = 'Edit Subject & Session';
+                document.getElementById('dialog-sec-subject').classList.add('active');
+            } else if (sectionId === 'teacher') {
+                titleEl.textContent = 'Edit Faculty Details';
+                document.getElementById('dialog-sec-teacher').classList.add('active');
+            } else if (sectionId === 'student') {
+                titleEl.textContent = 'Edit Student Details';
+                document.getElementById('dialog-sec-student').classList.add('active');
+            }
+
+            // Open dialog natively
+            const dialog = document.getElementById('editor-dialog');
+            document.body.style.overflow = 'hidden';
+            dialog.showModal();
+
+            // Auto-focus the first visible input inside the active section
+            const activeSec = document.querySelector('.dialog-section.active');
+            if (activeSec) {
+                const firstInput = activeSec.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }
+        }
+
+        function closeEditorModal() {
+            document.getElementById('editor-dialog').close();
+        }
+
+        function adjustMobileScale() {
+            if (window.innerWidth <= 768) {
+                const previewArea = document.querySelector('.preview-area');
+                const coverPage = document.getElementById('cover-page');
+                const indexPage = document.getElementById('index-page');
+                if (previewArea) {
+                    const availableWidth = previewArea.clientWidth - 20;
+                    const pageNativeWidth = 794;
+                    const scale = Math.min(availableWidth / pageNativeWidth, 1);
+                    if (coverPage) coverPage.style.setProperty('--page-scale', scale);
+                    if (indexPage) indexPage.style.setProperty('--page-scale', scale);
+                }
+            } else {
+                const coverPage = document.getElementById('cover-page');
+                const indexPage = document.getElementById('index-page');
+                if (coverPage) coverPage.style.removeProperty('--page-scale');
+                if (indexPage) indexPage.style.removeProperty('--page-scale');
+            }
+        }
+
+        window.addEventListener('resize', adjustMobileScale);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('preview-img').src = BASE64_IMAGE;
+            sync();
+            adjustMobileScale();
+
+            // Native Dialog Backdrop Click Closes Dialog
+            const dialog = document.getElementById('editor-dialog');
+            dialog.addEventListener('click', (e) => {
+                const rect = dialog.getBoundingClientRect();
+                const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.bottom &&
+                    rect.left <= e.clientX && e.clientX <= rect.right);
+                if (!isInDialog) {
+                    dialog.close();
+                }
+            });
+
+            dialog.addEventListener('close', () => {
+                document.body.style.removeProperty('overflow');
+            });
+
+            // Check first time visitor
+            if (!localStorage.getItem('hbtu_cover_visited')) {
+                startTour();
+            }
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (document.body.classList.contains('tour-active')) {
+                        endTour();
+                    }
+                }
+            });
+        });
+    </script>
+    <dialog id="editor-dialog">
+        <div class="dialog-header">
+            <h2 id="dialog-title">Edit Details</h2>
+            <button class="dialog-close" onclick="closeEditorModal()">&times;</button>
+        </div>
+        <div class="dialog-body">
+            <!-- Subject Section Inputs -->
+            <div id="dialog-sec-subject" class="dialog-section">
+                <div class="field">
+                    <label>Course / Subject Name</label>
+                    <input id="f-subject" value="" placeholder="e.g. Python Programming" oninput="sync()">
+                </div>
+                <div class="field">
+                    <label>File Type &amp; Code</label>
+                    <input id="f-code" value="" placeholder="e.g. Lab File (NCS - 203)" oninput="sync()">
+                </div>
+                <div class="field">
+                    <label>Academic Session</label>
+                    <input id="f-session" value="" placeholder="e.g. 2025-26" oninput="sync()">
+                </div>
+            </div>
+
+            <!-- Faculty Section Inputs -->
+            <div id="dialog-sec-teacher" class="dialog-section">
+                <div class="field">
+                    <label>Submitted To</label>
+                    <input id="f-teacher" value="" placeholder="e.g. Mrs. XYZ" oninput="sync()">
+                </div>
+            </div>
+
+            <!-- Student Section Inputs -->
+            <div id="dialog-sec-student" class="dialog-section">
+                <div class="field">
+                    <label>Full Name</label>
+                    <input id="f-name" value="" placeholder="e.g. Tony Stark" oninput="sync()">
+                </div>
+                <div class="field">
+                    <label>Roll Number</label>
+                    <input id="f-roll" value="" placeholder="e.g. 2401040XX" oninput="sync()">
+                </div>
+                <div class="field">
+                    <label>Branch</label>
+                    <input id="f-branch" value="" placeholder="e.g. Computer Science and Engineering" oninput="sync()">
+                </div>
+                <div class="field">
+                    <label>Year</label>
+                    <input id="f-year" value="" placeholder="e.g. 2nd" oninput="sync()">
+                </div>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <button class="dialog-save-btn" onclick="closeEditorModal()">Done</button>
+        </div>
+    </dialog>
+
+    <!-- Interactive Tour Overlay backdrop -->
+    <div class="tour-overlay" onclick="endTour(event)"></div>
+</body>
